@@ -1,4 +1,5 @@
-# raytracer
+# raytracer [![Rust](https://github.com/joshaustintech/raytracer/actions/workflows/rust.yml/badge.svg)](https://github.com/joshaustintech/raytracer/actions/workflows/rust.yml)
+
 Simple raytracer written in Rust
 
 ## Introduction
