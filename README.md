@@ -9,5 +9,8 @@ but am using Rust instead of the example C++ code.
 
 ## Progress
 
+### Colored Sphere
+![Colored Sphere](render_1688005594.jpg)
+
 ### Initial Render
 ![Initial Render](render_1687990097.jpg)

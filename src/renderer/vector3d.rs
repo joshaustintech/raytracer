@@ -1,6 +1,6 @@
 use std::ops;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Vector3D {
     pub x: f64,
     pub y: f64,
@@ -31,7 +31,7 @@ impl ops::Add for Vector3D {
     }
 }
 
-impl ops::Sub for Vector3D {
+impl ops::Sub<Vector3D> for Vector3D {
     type Output = Vector3D;
 
     fn sub(self, other: Vector3D) -> Vector3D {
@@ -39,7 +39,19 @@ impl ops::Sub for Vector3D {
     }
 }
 
-impl ops::Mul for Vector3D {
+impl ops::Sub<Vector3D> for f64 {
+    type Output = Vector3D;
+
+    fn sub(self, other: Vector3D) -> Vector3D {
+        Vector3D {
+            x: self - other.x,
+            y: self - other.y,
+            z: self - other.z,
+        }
+    }
+}
+
+impl ops::Mul<Vector3D> for Vector3D {
     type Output = Vector3D;
 
     fn mul(self, other: Vector3D) -> Vector3D {
@@ -51,7 +63,27 @@ impl ops::Mul for Vector3D {
     }
 }
 
-impl ops::Div for Vector3D {
+impl ops::Mul<f64> for Vector3D {
+    type Output = Vector3D;
+
+    fn mul(self, other: f64) -> Vector3D {
+        Vector3D {
+            x: self.x * other,
+            y: self.y * other,
+            z: self.z * other,
+        }
+    }
+}
+
+impl ops::Mul<Vector3D> for f64 {
+    type Output = Vector3D;
+
+    fn mul(self, other: Vector3D) -> Vector3D {
+        other * self
+    }
+}
+
+impl ops::Div<Vector3D> for Vector3D {
     type Output = Vector3D;
 
     fn div(self, other: Self) -> Self::Output {
@@ -63,6 +95,14 @@ impl ops::Div for Vector3D {
     }
 }
 
+impl ops::Div<f64> for Vector3D {
+    type Output = Vector3D;
+
+    fn div(self, other: f64) -> Self::Output {
+        self * (1.0 / other)
+    }
+}
+
 impl ToString for Vector3D {
     fn to_string(&self) -> String {
         format!("{} {} {}", self.x, self.y, self.z)
@@ -70,6 +110,7 @@ impl ToString for Vector3D {
 }
 
 impl Vector3D {
+
     fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
@@ -103,7 +144,6 @@ pub use Vector3D as Point;
 
 #[cfg(test)]
 mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
     #[test]
@@ -138,7 +178,7 @@ mod tests {
     }
 
     #[test]
-    fn test_vector3d_subtract() {
+    fn test_vector3d_subtract_vector3d() {
         let first = Vector3D {
             x: 1.0,
             y: 2.0,
@@ -156,7 +196,21 @@ mod tests {
     }
 
     #[test]
-    fn test_vector3d_multiply() {
+    fn test_f64_subtract_vector3d() {
+        let first = 1.0 as f64;
+        let second = Vector3D {
+            x: 4.0,
+            y: 5.0,
+            z: 6.0,
+        };
+        let difference = first - second;
+        assert_eq!(difference.x, -3.0);
+        assert_eq!(difference.y, -4.0);
+        assert_eq!(difference.z, -5.0);
+    }
+
+    #[test]
+    fn test_vector3d_multiply_vector3d() {
         let first = Vector3D {
             x: 1.0,
             y: 2.0,
@@ -174,7 +228,33 @@ mod tests {
     }
 
     #[test]
-    fn test_vector3d_divide() {
+    fn test_vector3d_multiply_f64() {
+        let vector = Vector3D {
+            x: 1.0,
+            y: 2.0,
+            z: 3.0,
+        };
+        let product = vector * 2.0;
+        assert_eq!(product.x, 2.0);
+        assert_eq!(product.y, 4.0);
+        assert_eq!(product.z, 6.0);
+    }
+
+    #[test]
+    fn test_f64_multiply_vector3d() {
+        let vector = Vector3D {
+            x: 1.0,
+            y: 2.0,
+            z: 3.0,
+        };
+        let product = 2.0 * vector;
+        assert_eq!(product.x, 2.0);
+        assert_eq!(product.y, 4.0);
+        assert_eq!(product.z, 6.0);
+    }
+
+    #[test]
+    fn test_vector3d_divide_vector32() {
         let first = Vector3D {
             x: 1.0,
             y: 2.0,
@@ -189,6 +269,19 @@ mod tests {
         assert_eq!(quotient.x, 0.25);
         assert_eq!(quotient.y, 0.4);
         assert_eq!(quotient.z, 0.5);
+    }
+
+    #[test]
+    fn test_vector3d_divide_f64() {
+        let vector = Vector3D {
+            x: 1.0,
+            y: 2.0,
+            z: 3.0,
+        };
+        let quotient = vector / 2.0;
+        assert_eq!(quotient.x, 0.5);
+        assert_eq!(quotient.y, 1.0);
+        assert_eq!(quotient.z, 1.5);
     }
 
     #[test]
