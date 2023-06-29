@@ -1,6 +1,6 @@
 use std::ops;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct Vector3D {
     pub x: f64,
     pub y: f64,
@@ -111,14 +111,16 @@ impl ToString for Vector3D {
 
 impl Vector3D {
 
-    fn length_squared(&self) -> f64 {
+    pub(crate) fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
+    #[allow(dead_code)]
     fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
+    #[allow(dead_code)]
     fn cross(first: &Vector3D, second: &Vector3D) -> Vector3D {
         Vector3D {
             x: first.y * second.z - first.z * second.y,
