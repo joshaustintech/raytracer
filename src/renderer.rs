@@ -1,30 +1,23 @@
 pub mod vector3d;
 pub mod ray;
+pub mod hit;
+pub mod sphere;
+pub mod world;
+pub mod util;
 
-use crate::renderer::ray::{Ray, dot};
+use crate::renderer::hit::{HitRecord, Hittable};
+use crate::renderer::world::HittableList;
+use crate::renderer::sphere::Sphere;
+use crate::renderer::ray::Ray;
 use crate::renderer::vector3d::{Color, Point, Vector3D};
 
-pub fn hit_sphere(center: Point, radius: f64, ray: &Ray) -> f64 {
-    let object_center = ray.origin - center;
-    let a: f64 = dot(ray.direction, ray.direction);
-    let b: f64 = 2.0 * dot(object_center, ray.direction);
-    let c = dot(object_center, object_center) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-b - discriminant.sqrt()) / (2.0 * a)
+pub fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
+    let mut hit_record = HitRecord::default();
+    if world.hit(ray, 0.0, f64::INFINITY, &mut hit_record) {
+        return 0.5 * (hit_record.normal + Color { x: 1.0, y: 1.0, z: 1.0 });
     }
-}
-
-pub fn ray_color(ray: &Ray) -> Color {
-    let mut t = hit_sphere(Point { x: 0.0, y: 0.0, z: -1.0 }, 0.5, ray);
-    if t > 0.0 {
-        let normal = ray.at(t) - Point { x: 0.0, y: 0.0, z: -1.0 };
-        return 0.5 * Color { x: normal.x + 1.0, y: normal.y + 1.0, z: normal.z + 1.0 };
-    }
-    t = 0.5 * (ray.direction.y + 1.0);
-    1.0 as f64 - t * Color { x: 1.0, y: 1.0, z: 1.0 } + t * Color { x: 0.5, y: 0.7, z: 1.0 }
+    let t = 0.5 * (ray.direction.y + 1.0);
+    (1.0 as f64 - t) * Color { x: 1.0, y: 1.0, z: 1.0 } + t * Color { x: 0.5, y: 0.7, z: 1.0 }
 }
 
 fn create_header(render: &mut String, width: u32, height: u32) {
@@ -41,6 +34,19 @@ pub fn render(width: u32) -> String {
     // Image
     let aspect_ratio = 16.0 / 9.0;
     let height = (width as f64 / aspect_ratio) as u32;
+
+    // World
+    let mut world = HittableList::new();
+
+    world.add(Box::new(Sphere {
+        center: Point { x: 0.125, y: 0.0, z: -1.0 },
+        radius: 0.5,
+    }));
+
+    world.add(Box::new(Sphere {
+        center: Point { x: 0.0, y: -100.5, z: -1.0 },
+        radius: 100.0,
+    }));
 
     // Camera
     let viewport_height = 2.0;
@@ -67,12 +73,12 @@ pub fn render(width: u32) -> String {
                 origin,
                 direction: lower_left_corner + (horizontal * u) + (vertical * v) - origin,
             };
-            let color = ray_color(&ray);
+            let color = ray_color(&ray, &world);
             render.push_str(color.get_color().as_str());
             render.push_str("\n");
         }
 
-        if y % (height / 4) == 0 {
+        if y % (height / 10) == 0 {
             println!("{}% complete", 100 - (y * 100 / height));
         }
 
