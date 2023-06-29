@@ -2,35 +2,9 @@ use std::io;
 use std::fs::File;
 use std::io::Write;
 use std::time::SystemTime;
-use crate::renderer::vector3d::Color;
+use crate::renderer::render;
 
 mod renderer;
-
-fn render(width: u32, height: u32) -> String {
-    println!("Width: {}px, Height: {}px", width, height);
-    let mut render = String::new();
-    render.push_str("P3\n");
-    render.push_str(&width.to_string());
-    render.push_str(" ");
-    render.push_str(&height.to_string());
-    render.push_str("\n255\n");
-    for y in (0..height).rev() {
-        for x in 0..width {
-            let color = Color {
-                x: x as f64 / width as f64,
-                y: y as f64 / height as f64,
-                z: 0.45
-            };
-            render.push_str(color.get_color().as_str());
-            render.push_str("\n");
-        }
-
-        if y % (height / 4) == 0 {
-            println!("{}% complete", 100 - (y * 100 / height));
-        }
-    }
-    return render;
-}
 
 fn get_input(message: &'static str) -> bool {
     println!("{}", message);
@@ -39,19 +13,19 @@ fn get_input(message: &'static str) -> bool {
         .read_line(&mut input)
         .expect("Failed to read line");
     let parsed = input.trim();
-    return if parsed == "y" || parsed.is_empty() {
-        true
-    } else if parsed == "n" {
-        false
-    } else {
-        println!("Invalid input, defaulting to 'y'");
-        true
+    return match parsed {
+        "y" | "" => true,
+        "n" => false,
+        _ => {
+            println!("Invalid input, defaulting to 'y'");
+            true
+        }
     }
 }
 
 fn main() {
     println!("Rendering...");
-    let rendered = render(512, 512);
+    let rendered = render(720);
     if get_input("Write to file? (y/n)\tdefault: 'y'") {
         println!("Writing to file...");
         let mut filename = String::new();

@@ -11,3 +11,6 @@ but am using Rust instead of the example C++ code.
 
 ### Initial Render
 ![Initial Render](render_1687990097.jpg)
+
+### Colored Sphere
+![Colored Sphere](render_1688005594.jpg)
