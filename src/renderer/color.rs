@@ -7,9 +7,9 @@ pub fn write_color(pixel_color: &Color, samples: i32) -> String {
     let mut b = pixel_color.z;
 
     let scale = 1.0 / samples as f64;
-    r *= scale;
-    g *= scale;
-    b *= scale;
+    r = (r * scale).sqrt();
+    g = (g * scale).sqrt();
+    b = (b * scale).sqrt();
 
     let ir = (256.0 * clamp(r, 0.0, 0.999)) as u32;
     let ig = (256.0 * clamp(g, 0.0, 0.999)) as u32;
