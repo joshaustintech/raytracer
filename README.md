@@ -9,6 +9,9 @@ but am using Rust instead of the example C++ code.
 
 ## Progress
 
+### Edge Smoothing ("Antialiasing")
+![Edge Smoothing](render_1688099584.jpg)
+
 ### Simple "World"
 ![Colored Sphere](render_1688022712.jpg)
 
