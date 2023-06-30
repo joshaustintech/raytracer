@@ -1,4 +1,5 @@
 use std::ops;
+use rand::Rng;
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Vector3D {
@@ -119,14 +120,24 @@ impl Vector3D {
     fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
+}
 
-    #[allow(dead_code)]
-    fn cross(first: &Vector3D, second: &Vector3D) -> Vector3D {
-        Vector3D {
-            x: first.y * second.z - first.z * second.y,
-            y: first.z * second.x - first.x * second.z,
-            z: first.x * second.y - first.y * second.x,
+fn random(min: f64, max: f64) -> Vector3D {
+    let mut rng = rand::thread_rng();
+    Vector3D {
+        x: rng.gen_range(min..max+1.0),
+        y: rng.gen_range(min..max+1.0),
+        z: rng.gen_range(min..max+1.0),
+    }
+}
+
+pub fn random_in_unit_sphere() -> Vector3D {
+    loop {
+        let p = random(-1.0, 1.0);
+        if p.length_squared() >= 1.0 {
+            continue;
         }
+        return p;
     }
 }
 
@@ -314,24 +325,6 @@ mod tests {
             z: 3.0,
         };
         assert_eq!(vector.length(), vector.length_squared().sqrt());
-    }
-
-    #[test]
-    fn test_vector3d_cross() {
-        let first = Vector3D {
-            x: 2.0,
-            y: 3.0,
-            z: 4.0,
-        };
-        let second = Vector3D {
-            x: 5.0,
-            y: 6.0,
-            z: 7.0,
-        };
-        let cross = Vector3D::cross(&first, &second);
-        assert_eq!(cross.x, -3.0);
-        assert_eq!(cross.y, 6.0);
-        assert_eq!(cross.z, -3.0);
     }
 
     #[test]

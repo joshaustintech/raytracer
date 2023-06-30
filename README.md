@@ -9,6 +9,9 @@ but am using Rust instead of the example C++ code.
 
 ## Progress
 
+### Shading ("Diffuse Materials")
+![Diffuse Materials](render_1688111057.jpg)
+
 ### Edge Smoothing ("Antialiasing")
 ![Edge Smoothing](render_1688099584.jpg)
 

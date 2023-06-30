@@ -15,12 +15,17 @@ use crate::renderer::hit::{HitRecord, Hittable};
 use crate::renderer::world::HittableList;
 use crate::renderer::sphere::Sphere;
 use crate::renderer::ray::Ray;
-use crate::renderer::vector3d::{Color, Point};
+use crate::renderer::vector3d::{Color, Point, random_in_unit_sphere};
 
-pub fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
+pub fn ray_color(ray: &Ray, world: &dyn Hittable, depth: i32) -> Color {
+    if depth <= 0 {
+        return Color { x: 0.0, y: 0.0, z: 0.0 };
+    }
     let mut hit_record = HitRecord::default();
-    if world.hit(ray, 0.0, f64::INFINITY, &mut hit_record) {
-        return 0.5 * (hit_record.normal + Color { x: 1.0, y: 1.0, z: 1.0 });
+    if world.hit(ray, 0.001, f64::INFINITY, &mut hit_record) {
+        let target = hit_record.point + hit_record.normal + random_in_unit_sphere();
+        let new_depth = depth - 1;
+        return 0.5 * ray_color(&Ray { origin: hit_record.point, direction: target - hit_record.point }, world, new_depth);
     }
     let t = 0.5 * (ray.direction.y + 1.0);
     (1.0 as f64 - t) * Color { x: 1.0, y: 1.0, z: 1.0 } + t * Color { x: 0.5, y: 0.7, z: 1.0 }
@@ -40,7 +45,8 @@ pub fn render(width: u32) -> String {
     // Image
     let aspect_ratio = 16.0 / 9.0;
     let height = (width as f64 / aspect_ratio) as u32;
-    let samples_per_pixel = 256;
+    let samples_per_pixel = 64;
+    let depth = 24;
 
     // World
     let mut world = HittableList::new();
@@ -63,16 +69,14 @@ pub fn render(width: u32) -> String {
     create_header(&mut render, width, height);
 
     for y in (0..height).rev() {
-        if y % 10 == 0 {
-            println!("Scanlines remaining: {}", y);
-        }
         for x in 0..width {
+            println!("Pixel {} of {}, {} scanlines remain", x, width, y);
             let mut pixel_color = Color { x: 0.0, y: 0.0, z: 0.0 };
             for _ in 0..samples_per_pixel {
                 let u = (x as f64 + random::<f64>()) / (width - 1) as f64;
                 let v = (y as f64 + random::<f64>()) / (height - 1) as f64;
                 let ray = camera.get_ray(u, v);
-                pixel_color = pixel_color + ray_color(&ray, &world);
+                pixel_color = pixel_color + ray_color(&ray, &world, depth);
             }
             render.push_str(&write_color(&pixel_color, samples_per_pixel));
         }
