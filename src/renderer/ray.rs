@@ -1,6 +1,5 @@
 use crate::renderer::vector3d::{Point, Vector3D};
 
-#[derive(Debug)]
 pub struct Ray {
     pub origin: Point,
     pub direction: Vector3D,

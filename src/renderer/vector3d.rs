@@ -120,6 +120,11 @@ impl Vector3D {
     fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
+
+    pub fn is_near_zero(&self) -> bool {
+        let s = 1e-8;
+        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+    }
 }
 
 fn random(min: f64, max: f64) -> Vector3D {
@@ -139,6 +144,14 @@ pub fn random_in_unit_sphere() -> Vector3D {
         }
         return p;
     }
+}
+
+pub fn unit_vector(v: Vector3D) -> Vector3D {
+    v / v.length()
+}
+
+pub fn random_unit_vector() -> Vector3D {
+    unit_vector(random_in_unit_sphere())
 }
 
 pub use Vector3D as Color;

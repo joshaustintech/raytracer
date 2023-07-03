@@ -6,30 +6,18 @@ pub mod world;
 pub mod util;
 pub mod camera;
 pub mod color;
+pub mod material;
 
-use rand::random;
+use std::rc::Rc;
+use rand::{Rng, random};
 
 use crate::renderer::camera::Camera;
-use crate::renderer::color::write_color;
-use crate::renderer::hit::{HitRecord, Hittable};
+use crate::renderer::color::{ray_color, write_color};
 use crate::renderer::world::HittableList;
 use crate::renderer::sphere::Sphere;
-use crate::renderer::ray::Ray;
-use crate::renderer::vector3d::{Color, Point, random_in_unit_sphere};
-
-pub fn ray_color(ray: &Ray, world: &dyn Hittable, depth: i32) -> Color {
-    if depth <= 0 {
-        return Color { x: 0.0, y: 0.0, z: 0.0 };
-    }
-    let mut hit_record = HitRecord::default();
-    if world.hit(ray, 0.001, f64::INFINITY, &mut hit_record) {
-        let target = hit_record.point + hit_record.normal + random_in_unit_sphere();
-        let new_depth = depth - 1;
-        return 0.5 * ray_color(&Ray { origin: hit_record.point, direction: target - hit_record.point }, world, new_depth);
-    }
-    let t = 0.5 * (ray.direction.y + 1.0);
-    (1.0 as f64 - t) * Color { x: 1.0, y: 1.0, z: 1.0 } + t * Color { x: 0.5, y: 0.7, z: 1.0 }
-}
+use crate::renderer::vector3d::{Color, Point};
+use crate::renderer::material::{Material, metal::Metal};
+use crate::renderer::material::lambert::Lambert;
 
 fn create_header(render: &mut String, width: u32, height: u32) {
     println!("Width: {}px, Height: {}px", width, height);
@@ -45,21 +33,36 @@ pub fn render(width: u32) -> String {
     // Image
     let aspect_ratio = 16.0 / 9.0;
     let height = (width as f64 / aspect_ratio) as u32;
-    let samples_per_pixel = 64;
-    let depth = 24;
+    let samples_per_pixel = 50;
+    let depth = 25;
 
     // World
     let mut world = HittableList::new();
 
+
+    for x in 1..10 {
+        for z in 1..5 {
+            let mut rng = rand::thread_rng();
+            let choose_mat: Rc<dyn Material> = match rng.gen_range(1..4) {
+                1 => Rc::new(Metal { albedo: Color { x: 0.05, y: 0.05, z: 0.05 } }),
+                2 => Rc::new(Metal { albedo: Color { x: 0.7, y: 0.7, z: 0.7 } }),
+                _ => Rc::new(Metal { albedo: Color { x: 0.0, y: 0.0, z: 0.33 } }),
+            };
+            let coord_x = -3.0 + (0.6 * x as f64);
+            let coord_z = -1.2 - (0.5 * z as f64);
+            world.add(Box::new(Sphere {
+                center: Point { x: coord_x, y: -0.75, z: coord_z },
+                radius: 0.25,
+                material: choose_mat,
+            }));
+        }
+    }
     world.add(Box::new(Sphere {
-        center: Point { x: 0.125, y: 0.0, z: -1.0 },
-        radius: 0.5,
+        center: Point { x: 0.0, y: -101.0, z: 0.0 },
+        radius: 100.0,
+        material: Rc::new(Lambert { albedo: Color { x: 0.0, y: 0.7, z: 0.0 } }),
     }));
 
-    world.add(Box::new(Sphere {
-        center: Point { x: 0.0, y: -100.5, z: -1.0 },
-        radius: 100.0,
-    }));
 
     // Camera
     let camera = Camera::new();

@@ -1,10 +1,12 @@
+use std::rc::Rc;
+use crate::renderer::material::Material;
 use crate::renderer::ray::{dot, Ray};
 use crate::renderer::vector3d::{Point, Vector3D};
 
-#[derive(Debug, Copy, Clone, Default)]
 pub struct HitRecord {
     pub point: Point,
     pub normal: Vector3D,
+    pub material: Rc<dyn Material>,
     pub t: f64,
     pub front_face: bool,
 }
@@ -22,5 +24,5 @@ impl HitRecord {
 }
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool;
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
