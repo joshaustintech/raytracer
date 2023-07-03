@@ -9,6 +9,10 @@ but am using Rust instead of the example C++ code.
 
 ## Progress
 
+### Reflective Material
+![Reflective material, two spheres](render_1688285882.jpg)
+![Reflective material, grid of spheres](render_1688344777.jpg)
+
 ### Shading ("Diffuse Materials")
 ![Diffuse Materials](render_1688111057.jpg)
 
